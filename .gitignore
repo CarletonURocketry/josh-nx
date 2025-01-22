@@ -1,2 +1,5 @@
 *.o
 *.cache/
+.depend
+*.a
+Make.dep
