@@ -64,10 +64,6 @@ int stm32_bringup(void)
   int ret = OK;
 
   UNUSED(ret);
-
-  stm32_configgpio(GPIO_LD1);
-  stm32_gpiowrite(GPIO_LD1, true);
-
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
