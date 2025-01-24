@@ -38,6 +38,7 @@
 #include "josh.h"
 
 #ifdef CONFIG_ARCH_LEDS
+#info "leds configured for Josh"
 
 /****************************************************************************
  * Private Functions
