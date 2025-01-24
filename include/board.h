@@ -285,23 +285,6 @@
 
 /* LED definitions **********************************************************/
 
-/* The board has 1 user LED that could be used this diagnostic LED too.
- *
- * TODO: update for number of Josh LEDs
- * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
- * any way.
- * The following definitions are used to access individual LEDs.
- */
-
-/* LED index values for use with board_userled() */
-
-#define BOARD_LED1        0
-#define BOARD_NLEDS       1
-
-/* LED bits for use with board_userled_all() */
-
-#define BOARD_LED1_BIT    (1 << BOARD_LED1)
-
 /* If CONFIG_ARCH_LEDS is defined, the usage by the board port is defined in
  * include/board.h and src/stm32_leds.c.
  * The LEDs are used to encode OS-related events as follows:
@@ -334,6 +317,21 @@
 
 #define GPIO_USART1_RX   (GPIO_USART1_RX_3 | GPIO_SPEED_100MHz)  /* PB15 */
 #define GPIO_USART1_TX   (GPIO_USART1_TX_3 | GPIO_SPEED_100MHz)  /* PB14 */
+
+/* I2C1 on PB8 & PB9 */
+
+#define GPIO_I2C1_SCL   (GPIO_I2C1_SCL_2 | GPIO_SPEED_100MHz)  /* PB8 */
+#define GPIO_I2C1_SDA   (GPIO_I2C1_SDA_2 | GPIO_SPEED_100MHz)  /* PB9 */
+
+/* I2C2 on PB10 & PB11 */
+
+#define GPIO_I2C2_SCL   (GPIO_I2C2_SCL_1 | GPIO_SPEED_100MHz)  /* PB10 */
+#define GPIO_I2C2_SDA   (GPIO_I2C2_SDA_1 | GPIO_SPEED_100MHz)  /* PB11 */
+
+/* I2C4 on PD12 & PD13 */
+
+#define GPIO_I2C4_SCL   (GPIO_I2C4_SCL_1 | GPIO_SPEED_100MHz)  /* PB10 */
+#define GPIO_I2C4_SDA   (GPIO_I2C4_SDA_1 | GPIO_SPEED_100MHz)  /* PB11 */
 
 /* OTGFS */
 

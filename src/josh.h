@@ -99,19 +99,18 @@
 
 /* LED
  *
- * TODO change
- *
  * Josh has three software controllable LEDs on board:
  *   - Started: Green LED to indicate startup
  *   - Panic: Red LED to indicate panic state
  *   - Eject: Green LED to indicate when SD card can be removed safely
- *
- * The WeAct STM32H743 board has only one Blue LED (E3) controlled by GPIO.
- * LED E3: connected to PC3
  */
 
-#define GPIO_LD1       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
-                        GPIO_OUTPUT_CLEAR | GPIO_PORTA | GPIO_PIN4)
+#define GPIO_LED_STARTED (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
+                          GPIO_OUTPUT_CLEAR | GPIO_PORTA | GPIO_PIN4)
+#define GPIO_LED_PANIC   (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
+                          GPIO_OUTPUT_CLEAR | GPIO_PORTA | GPIO_PIN5)
+#define GPIO_LED_EJECT   (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
+                          GPIO_OUTPUT_CLEAR | GPIO_PORTD | GPIO_PIN3)
 
 /****************************************************************************
  * Public Function Prototypes

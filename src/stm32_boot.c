@@ -54,6 +54,7 @@ void stm32_boardinitialize(void)
   /* Configure on-board LEDs if LED support has been selected. */
 
   board_autoled_initialize();
+  board_autoled_on(LED_STARTED); /* Power on LED */
 #endif
 }
 

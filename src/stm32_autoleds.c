@@ -40,16 +40,6 @@
 #ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-static inline void set_led(bool v)
-{
-  ledinfo("Turn LED %s\n", v? "on":"off");
-  stm32_gpiowrite(GPIO_LD1, v);
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -61,8 +51,9 @@ void board_autoled_initialize(void)
 {
   /* Configure LED GPIO for output */
 
-  stm32_configgpio(GPIO_LD1);
-  set_led(true);
+  stm32_configgpio(GPIO_LED_STARTED);
+  stm32_configgpio(GPIO_LED_PANIC);
+  stm32_configgpio(GPIO_LED_EJECT);
 }
 
 /****************************************************************************
@@ -76,20 +67,20 @@ void board_autoled_on(int led)
   switch (led)
     {
     case LED_STARTED:
-    case LED_HEAPALLOCATE:
 
       /* As the board provides only one soft controllable LED, we simply
        * turn it on when the board boots.
        */
 
-      set_led(true);
+      stm32_gpiowrite(GPIO_LED_STARTED, true);
       break;
 
     case LED_PANIC:
+    case LED_ASSERTION:
 
       /* For panic state, the LED is blinking */
 
-      set_led(true);
+      stm32_gpiowrite(GPIO_LED_PANIC, true);
       break;
     }
 }
@@ -102,11 +93,13 @@ void board_autoled_off(int led)
 {
   switch (led)
     {
+
     case LED_PANIC:
+      stm32_gpiowrite(GPIO_LED_PANIC, false);
+      break;
 
-      /* For panic state, the LED is blinking */
-
-      set_led(false);
+    case LED_STARTED:
+      stm32_gpiowrite(GPIO_LED_STARTED, false);
       break;
     }
 }
