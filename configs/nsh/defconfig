@@ -5,6 +5,8 @@
 # You can then do "make savedefconfig" to generate a new defconfig file that includes your
 # modifications.
 #
+# CONFIG_MMCSD_HAVE_CARDDETECT is not set
+# CONFIG_MMCSD_MMCSUPPORT is not set
 # CONFIG_SPI_CALLBACK is not set
 # CONFIG_STANDARD_SERIAL is not set
 # CONFIG_STM32H7_USE_LEGACY_PINMAP is not set
