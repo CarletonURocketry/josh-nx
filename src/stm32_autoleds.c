@@ -54,6 +54,9 @@ void board_autoled_initialize(void)
   stm32_configgpio(GPIO_LED_STARTED);
   stm32_configgpio(GPIO_LED_PANIC);
   stm32_configgpio(GPIO_LED_EJECT);
+
+  stm32_configgpio(GPIO_BUZZER);
+  stm32_gpiowrite(GPIO_BUZZER, true);
 }
 
 /****************************************************************************

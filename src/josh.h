@@ -112,6 +112,24 @@
 #define GPIO_LED_EJECT   (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
                           GPIO_OUTPUT_CLEAR | GPIO_PORTD | GPIO_PIN3)
 
+/* Buzzer
+ * Josh has an arming buzzer to indicate when it is armed and running.
+ */
+
+#define GPIO_BUZZER      (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
+                          GPIO_OUTPUT_CLEAR | GPIO_PORTE | GPIO_PIN13)
+
+/* SD/TF Card'detected pin */
+
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_MMCSD_SDIO)
+#  undef HAVE_SDIO
+#endif
+
+#define GPIO_SDIO_NCD      (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTC|GPIO_PIN13)
+
+#define SDIO_SLOTNO        0
+#define SDIO_MINOR         0
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -132,5 +150,16 @@
  ****************************************************************************/
 
 int stm32_bringup(void);
+
+/****************************************************************************
+ * Name: stm32_sdio_initialize
+ *
+ * Description:
+ *   Initialize SDMMC slot 1 into SDMMC device driver.
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32H7_SDMMC
+int stm32_sdio_initialize(void);
+#endif
 
 #endif /* __BOARDS_ARM_STM32H7_JOSH_SRC_JOSH_H */

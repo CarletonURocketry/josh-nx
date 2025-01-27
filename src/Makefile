@@ -31,4 +31,8 @@ ifeq ($(CONFIG_BOARDCTL_IOCTL),y)
 CSRCS += stm32_ioctl.c
 endif
 
+ifeq ($(CONFIG_STM32H7_SDMMC),y)
+CSRCS += stm32_sdmmc.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

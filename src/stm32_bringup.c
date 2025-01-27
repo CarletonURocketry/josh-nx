@@ -36,6 +36,7 @@
 #include "josh.h"
 
 #include "stm32_gpio.h"
+#include "stm32_sdmmc.h"
 #include "stm32.h"
 
 /****************************************************************************
@@ -143,5 +144,12 @@ int stm32_bringup(void)
     }
 #endif /* CONFIG_FS_PROCFS */
 
-  return OK;
+#ifdef CONFIG_STM32H7_SDMMC
+    ret = stm32_sdio_initialize();
+    if (ret < 0) {
+      syslog(LOG_ERR, "ERROR: Failed to register SD card device: %d\n.", ret);
+    }
+#endif
+
+    return OK;
 }
