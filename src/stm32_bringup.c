@@ -39,6 +39,11 @@
 #include "stm32_sdmmc.h"
 #include "stm32.h"
 
+#if defined(CONFIG_SENSORS_MS56XX)
+#include "stm32_i2c.h"
+#include <nuttx/sensors/ms56xx.h>
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -132,7 +137,18 @@ int stm32_bringup(void)
   stm32_i2ctool();
 #endif
 
-  UNUSED(ret);
+/* Sensor drivers */
+
+#if defined(CONFIG_SENSORS_MS56XX)
+  /* MS56XX at 0x76 on I2C bus 1 */
+
+  ret = ms56xx_register(stm32_i2cbus_initialize(1), 0, MS56XX_ADDR1,
+                        MS56XX_MODEL_MS5607);
+  if (ret < 0) {
+    syslog(LOG_ERR, "Failed to register MS5607: %d\n", ret);
+  }
+#endif /* defined(CONFIG_SENSORS_MS56XX) */
+
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
@@ -149,6 +165,16 @@ int stm32_bringup(void)
     if (ret < 0) {
       syslog(LOG_ERR, "ERROR: Failed to register SD card device: %d\n.", ret);
     }
+
+    /* Mount SD card as file system */
+
+    ret = nx_mount("/dev/mmcsd0", "/mnt/sd0p0", "vfat", 0, NULL);
+
+    if (ret) {
+      ferr("ERROR: Could not mount fat partition %d: \n", ret);
+      return ret;
+     }
+
 #endif
 
     return OK;
