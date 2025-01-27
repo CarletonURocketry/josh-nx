@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <syslog.h>
 #include <sys/types.h>
 #include <nuttx/board.h>
 
@@ -64,6 +65,7 @@
 
 int board_app_initialize(uintptr_t arg)
 {
+  syslog(LOG_INFO, "Josh board app initialize.\n");
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
   /* Board initialization already performed by board_late_initialize() */
 
@@ -71,6 +73,7 @@ int board_app_initialize(uintptr_t arg)
 #else
   /* Perform board-specific initialization */
 
+  syslog(LOG_INFO, "stm32_bringup being called.\n");
   return stm32_bringup();
 #endif
 }

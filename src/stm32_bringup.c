@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <debug.h>
 #include <sys/types.h>
 #include <syslog.h>
 #include <errno.h>
@@ -56,13 +57,13 @@ static void stm32_i2c_register(int bus)
   int ret;
 
   i2c = stm32_i2cbus_initialize(bus);
-  assert(i2c != NULL);
   if (i2c == NULL)
     {
       syslog(LOG_ERR, "ERROR: Failed to get I2C%d interface\n", bus);
     }
   else
     {
+      i2cinfo("I2C bus %d initialized\n", bus);
       ret = i2c_register(i2c, bus);
       if (ret < 0)
         {
@@ -85,6 +86,7 @@ static void stm32_i2c_register(int bus)
 #if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
 static void stm32_i2ctool(void)
 {
+  i2cinfo("Registering I2CTOOL busses.");
 #ifdef CONFIG_STM32H7_I2C1
   stm32_i2c_register(1);
 #endif
