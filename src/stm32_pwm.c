@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32h7/josh/src/stm32_autoleds.c
+ * boards/arm/stm32h7/josh/src/stm32_pwm.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,8 +16,6 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- * TODO: change for number of LEDs on Josh
- *
  ****************************************************************************/
 
 /****************************************************************************
@@ -25,83 +23,81 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <sys/types.h>
 
-#include <stdbool.h>
+#include <errno.h>
 #include <debug.h>
 
-#include <sys/param.h>
-
-#include <nuttx/board.h>
+#include <nuttx/timers/pwm.h>
 #include <arch/board/board.h>
 
-#include "stm32_gpio.h"
+#include "chip.h"
+#include "arm_internal.h"
+#include "stm32_pwm.h"
 #include "josh.h"
 
-#ifdef CONFIG_ARCH_LEDS
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
+
+#define HAVE_PWM 1
+
+#ifndef CONFIG_PWM
+#  undef HAVE_PWM
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_autoled_initialize
+ * Name: stm32_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
  ****************************************************************************/
 
-void board_autoled_initialize(void)
+int stm32_pwm_setup(void)
 {
-  /* Configure LED GPIO for output */
+#ifdef HAVE_PWM
+  static bool initialized = false;
+  struct pwm_lowerhalf_s *pwm;
+  int ret;
 
-  stm32_configgpio(GPIO_LED_STARTED);
-  stm32_configgpio(GPIO_LED_PANIC);
-  stm32_configgpio(GPIO_LED_EJECT);
-}
+  /* Have we already initialized? */
 
-/****************************************************************************
- * Name: board_autoled_on
- ****************************************************************************/
-
-void board_autoled_on(int led)
-{
-  ledinfo("board_autoled_on(%d)\n", led);
-
-  switch (led)
+  if (!initialized)
     {
-    case LED_STARTED:
+      /* Get an instance of the PWM interface */
 
-      /* As the board provides only one soft controllable LED, we simply
-       * turn it on when the board boots.
-       */
+      pwm = stm32_pwminitialize(JOSH_PWMTIMER);
+      if (pwm == NULL)
+        {
+          tmrerr("ERROR: Failed to get the STM32 PWM lower half\n");
+          return -ENODEV;
+        }
 
-      stm32_gpiowrite(GPIO_LED_STARTED, true);
-      break;
+      /* Register the PWM driver at "/dev/pwm0" */
 
-    case LED_PANIC:
-    case LED_ASSERTION:
+ #if defined(CONFIG_STM32H7_TIM1_PWM)
+      ret = pwm_register("/dev/pwm0", pwm);
+      if (ret < 0)
+        {
+          tmrerr("ERROR: pwm_register failed: %d\n", ret);
+          return ret;
+        }
+#endif
 
-      /* For panic state, the LED is blinking */
+      /* Now we are initialized */
 
-      stm32_gpiowrite(GPIO_LED_PANIC, true);
-      break;
+      initialized = true;
     }
+
+  return OK;
+#else
+  return -ENODEV;
+#endif
 }
-
-/****************************************************************************
- * Name: board_autoled_off
- ****************************************************************************/
-
-void board_autoled_off(int led)
-{
-  switch (led)
-    {
-
-    case LED_PANIC:
-      stm32_gpiowrite(GPIO_LED_PANIC, false);
-      break;
-
-    case LED_STARTED:
-      stm32_gpiowrite(GPIO_LED_STARTED, false);
-      break;
-    }
-}
-
-#endif /* CONFIG_ARCH_LEDS */

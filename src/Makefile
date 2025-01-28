@@ -35,4 +35,8 @@ ifeq ($(CONFIG_STM32H7_SDMMC),y)
 CSRCS += stm32_sdmmc.c
 endif
 
+ifeq ($(CONFIG_PWM),y)
+CSRCS += stm32_pwm.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
