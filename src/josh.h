@@ -116,10 +116,25 @@
  * Josh has an arming buzzer to indicate when it is armed and running.
  */
 
-#define GPIO_BUZZER      (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
-                          GPIO_OUTPUT_CLEAR | GPIO_PORTE | GPIO_PIN13)
+#define JOSH_PWMTIMER 1
 
-/* SD/TF Card'detected pin */
+/* PWM output at buzzer, which is PE13 */
+
+#define GPIO_TIM1_CH3OUT GPIO_TIM1_CH3OUT_2
+
+#if defined(CONFIG_STM32H7_TIM1_PWM)
+
+#if !defined(CONFIG_STM32H7_TIM1_PWM)
+#error "Josh requires CONFIG_STM32H7_TIM1_PWM to have PWM"
+#endif
+
+#if CONFIG_STM32H7_TIM1_CHANNEL != 3 || !defined(CONFIG_STM32H7_TIM1_CH3OUT)
+#error "Timer 1 Channel 3 must be selected for PWM on PE13"
+#endif
+
+#endif
+
+/* SD card detected pin (currently unused) */
 
 #if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_MMCSD_SDIO)
 #  undef HAVE_SDIO
@@ -160,6 +175,17 @@ int stm32_bringup(void);
 
 #ifdef CONFIG_STM32H7_SDMMC
 int stm32_sdio_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_pwm
+ *
+ * Description:
+ *   Initialize PWM driver.
+ ****************************************************************************/
+
+#ifdef CONFIG_PWM
+int stm32_pwm_setup(void);
 #endif
 
 #endif /* __BOARDS_ARM_STM32H7_JOSH_SRC_JOSH_H */

@@ -45,6 +45,10 @@
 #include <nuttx/sensors/ms56xx.h>
 #endif
 
+#ifdef CONFIG_PWM
+#include "stm32_pwm.h"
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -216,5 +220,12 @@ int stm32_bringup(void) {
 
 #endif
 
-  return OK;
+#ifdef CONFIG_PWM
+  ret = stm32_pwm_setup();
+  if (ret < 0) {
+    syslog(LOG_ERR, "Could not register PWM driver.");
+  }
+#endif
+
+      return OK;
 }

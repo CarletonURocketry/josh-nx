@@ -358,6 +358,11 @@
 #define GPIO_SDMMC1_CK  (GPIO_SDMMC1_CK_0|GPIO_SPEED_50MHz)
 #define GPIO_SDMMC1_CMD (GPIO_SDMMC1_CMD_0|GPIO_SPEED_50MHz)
 
+/* PWM output at buzzer, which is PE13 */
+
+#define GPIO_TIM1_CH3OUT GPIO_TIM1_CH3OUT_2
+
+
 /* SDMMC definitions ********************************************************/
 
 /* Init 400kHz, PLL1Q/(2*250) */
