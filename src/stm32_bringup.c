@@ -25,19 +25,20 @@
 #include <nuttx/config.h>
 
 #include <debug.h>
+#include <errno.h>
 #include <sys/types.h>
 #include <syslog.h>
-#include <errno.h>
 
 #include <arch/board/board.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/fs/partition.h>
 
 #include "josh.h"
 
+#include "stm32.h"
 #include "stm32_gpio.h"
 #include "stm32_sdmmc.h"
-#include "stm32.h"
 
 #if defined(CONFIG_SENSORS_MS56XX)
 #include "stm32_i2c.h"
@@ -48,6 +49,26 @@
  * Private Functions
  ****************************************************************************/
 
+typedef struct {
+  int partition_num;
+  uint8_t err;
+} partition_state_t;
+
+static void partition_handler(struct partition_s *part, void *arg) {
+  partition_state_t *partition_handler_state = (partition_state_t *)arg;
+
+  char devname[] = "/dev/mmcsd0p0";
+
+  if (partition_handler_state->partition_num < 10 &&
+      part->index == partition_handler_state->partition_num) {
+    finfo("Num of sectors: %d \n", part->nblocks);
+    devname[sizeof(devname) - 2] = partition_handler_state->partition_num + 48;
+    register_blockpartition(devname, 0, "/dev/mmcsd0", part->firstblock,
+                            part->nblocks);
+    partition_handler_state->err = 0;
+  }
+}
+
 /****************************************************************************
  * Name: stm32_i2c_register
  *
@@ -57,27 +78,21 @@
  ****************************************************************************/
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
-static void stm32_i2c_register(int bus)
-{
+static void stm32_i2c_register(int bus) {
   struct i2c_master_s *i2c;
   int ret;
 
   i2c = stm32_i2cbus_initialize(bus);
-  if (i2c == NULL)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to get I2C%d interface\n", bus);
+  if (i2c == NULL) {
+    syslog(LOG_ERR, "ERROR: Failed to get I2C%d interface\n", bus);
+  } else {
+    i2cinfo("I2C bus %d initialized\n", bus);
+    ret = i2c_register(i2c, bus);
+    if (ret < 0) {
+      syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
+      stm32_i2cbus_uninitialize(i2c);
     }
-  else
-    {
-      i2cinfo("I2C bus %d initialized\n", bus);
-      ret = i2c_register(i2c, bus);
-      if (ret < 0)
-        {
-          syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n",
-                 bus, ret);
-          stm32_i2cbus_uninitialize(i2c);
-        }
-    }
+  }
 }
 #endif
 
@@ -90,8 +105,7 @@ static void stm32_i2c_register(int bus)
  ****************************************************************************/
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
-static void stm32_i2ctool(void)
-{
+static void stm32_i2ctool(void) {
   i2cinfo("Registering I2CTOOL busses.");
 #ifdef CONFIG_STM32H7_I2C1
   stm32_i2c_register(1);
@@ -127,8 +141,7 @@ static void stm32_i2ctool(void)
  *
  ****************************************************************************/
 
-int stm32_bringup(void)
-{
+int stm32_bringup(void) {
   int ret = OK;
 
   /* I2C device drivers */
@@ -137,7 +150,7 @@ int stm32_bringup(void)
   stm32_i2ctool();
 #endif
 
-/* Sensor drivers */
+  /* Sensor drivers */
 
 #if defined(CONFIG_SENSORS_MS56XX)
   /* MS56XX at 0x76 on I2C bus 1 */
@@ -153,29 +166,55 @@ int stm32_bringup(void)
   /* Mount the procfs file system */
 
   ret = nx_mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to mount the PROC filesystem: %d\n",  ret);
-    }
+  if (ret < 0) {
+    syslog(LOG_ERR, "ERROR: Failed to mount the PROC filesystem: %d\n", ret);
+  }
 #endif /* CONFIG_FS_PROCFS */
 
 #ifdef CONFIG_STM32H7_SDMMC
-    ret = stm32_sdio_initialize();
-    if (ret < 0) {
-      syslog(LOG_ERR, "ERROR: Failed to register SD card device: %d\n.", ret);
+  ret = stm32_sdio_initialize();
+  if (ret < 0) {
+    syslog(LOG_ERR, "ERROR: Failed to register SD card device: %d\n.", ret);
+  }
+
+  /* Look for both partitions */
+
+  static partition_state_t partitions[] = {
+      {.partition_num = 0, .err = ENOENT},
+      {.partition_num = 1, .err = ENOENT},
+  };
+
+  for (int i = 0; i < 2; i++) {
+    parse_block_partition("/dev/mmcsd0", partition_handler, &partitions[i]);
+    if (partitions[i].err == ENOENT) {
+      fwarn("Partition %d did not register \n", partitions[i].partition_num);
+    } else {
+      finfo("Partition %d registered! \n", partitions[i].partition_num);
     }
+  }
 
-    /* Mount SD card as file system */
+  /* Mount first partitions as FAT file system (user friendly) */
 
-    ret = nx_mount("/dev/mmcsd0", "/mnt/sd0p0", "vfat", 0, NULL);
+  ret = nx_mount("/dev/mmcsd0p0", "/mnt/usrfs", "vfat", 0, NULL);
 
-    if (ret) {
-      ferr("ERROR: Could not mount fat partition %d: \n", ret);
-      return ret;
-     }
+  if (ret) {
+    ferr("ERROR: Could not mount fat partition %d: \n", ret);
+    return ret;
+  }
+
+  /* Mount second partition as littlefs file system (power safe)
+   * Auto-format because a user cannot feasibly create littlefs system ahead of
+   * time, so we auto format to power-safe.
+   */
+
+  /*ret = nx_mount("/dev/mmcsd0p1", "/mnt/pwrfs", "littlefs", 0, "autoformat");*/
+
+  /* if (ret) { */
+  /*   ferr("ERROR: Could not mount littlefs partition %d: \n", ret); */
+  /*   return ret; */
+  /* } */
 
 #endif
 
-    return OK;
+  return OK;
 }
