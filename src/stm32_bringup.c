@@ -226,13 +226,12 @@ int stm32_bringup(void) {
    * time, so we auto format to power-safe.
    */
 
-  /*ret = nx_mount("/dev/mmcsd0p1", "/mnt/pwrfs", "littlefs", 0,
-   * "autoformat");*/
+  ret = nx_mount("/dev/mmcsd0p1", "/mnt/pwrfs", "littlefs", 0, "autoformat");
 
-  /* if (ret) { */
-  /*   ferr("ERROR: Could not mount littlefs partition %d: \n", ret); */
-  /*   return ret; */
-  /* } */
+  if (ret) {
+    ferr("ERROR: Could not mount littlefs partition %d: \n", ret);
+    return ret;
+  }
 
 #endif
 
