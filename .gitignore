@@ -3,3 +3,4 @@
 .depend
 *.a
 Make.dep
+*.su
