@@ -45,6 +45,11 @@
 #include <nuttx/sensors/ms56xx.h>
 #endif
 
+#if defined(CONFIG_SENSORS_LSM6DSO32)
+#include "stm32_i2c.h"
+#include <nuttx/sensors/lsm6dso32.h>
+#endif
+
 #if defined(CONFIG_I2C_EE_24XX)
 #include "stm32_i2c.h"
 #include <nuttx/eeprom/i2c_xx24xx.h>
@@ -77,6 +82,33 @@ static void partition_handler(struct partition_s *part, void *arg) {
     partition_handler_state->err = 0;
   }
 }
+
+#if defined(CONFIG_SENSORS_LSM6DSO32) && defined(CONFIG_SCHED_HPWORK)
+
+/****************************************************************************
+ * Name: josh_lsm6dso32_gy_attach
+ *
+ * Description:
+ *   Register and enable an interrupt for the LSM6DSO32 gyroscope interrupt.
+ *
+ ****************************************************************************/
+
+static int josh_lsm6dso32_gy_attach(xcpt_t handler, FAR void *arg) {
+  return stm32_gpiosetevent(GPIO_GY_INT, true, false, false, handler, arg);
+}
+
+/****************************************************************************
+ * Name: josh_lsm6dso32_xl_attach
+ *
+ * Description:
+ *   Register and enable an interrupt for the LSM6DSO32 gyroscope interrupt.
+ *
+ ****************************************************************************/
+
+static int josh_lsm6dso32_xl_attach(xcpt_t handler, FAR void *arg) {
+  return stm32_gpiosetevent(GPIO_XL_INT, true, false, false, handler, arg);
+}
+#endif
 
 /****************************************************************************
  * Name: stm32_i2c_register
@@ -180,6 +212,31 @@ int stm32_bringup(void) {
     syslog(LOG_ERR, "Failed to register MS5607: %d\n", ret);
   }
 #endif /* defined(CONFIG_SENSORS_MS56XX) */
+
+#if defined(CONFIG_SENSORS_LSM6DSO32)
+  /* Register LSM6DSO32 IMU at 0x6a on I2C1 */
+
+  /* Only use interrupt driven mode if HPWORK is enabled */
+
+  struct lsm6dso32_config_s lsm6dso32_config = {
+      .gy_int = LSM6DSO32_INT1,
+      .xl_int = LSM6DSO32_INT2,
+  };
+
+#ifdef CONFIG_SCHED_HPWORK
+  lsm6dso32_config.gy_attach = josh_lsm6dso32_gy_attach;
+  lsm6dso32_config.xl_attach = josh_lsm6dso32_xl_attach;
+#else
+  lsm6dso32_config.gy_attach = NULL;
+  lsm6dso32_config.xl_attach = NULL;
+#endif /* CONFIG_SCHED_HPWORK */
+
+  ret = lsm6dso32_register(stm32_i2cbus_initialize(1), 0x6a, 0,
+                           &lsm6dso32_config);
+  if (ret < 0) {
+    syslog(LOG_ERR, "Failed to register LSM6DSO32: %d\n", ret);
+  }
+#endif /* defined(CONFIG_SENSORS_LSM6DSO32) */
 
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
