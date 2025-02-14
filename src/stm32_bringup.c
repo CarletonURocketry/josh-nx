@@ -94,6 +94,10 @@ static void partition_handler(struct partition_s *part, void *arg) {
  ****************************************************************************/
 
 static int josh_lsm6dso32_gy_attach(xcpt_t handler, FAR void *arg) {
+  int err = stm32_configgpio(GPIO_GY_INT);
+  if (err < 0) {
+    return err;
+  }
   return stm32_gpiosetevent(GPIO_GY_INT, true, false, false, handler, arg);
 }
 
@@ -106,6 +110,10 @@ static int josh_lsm6dso32_gy_attach(xcpt_t handler, FAR void *arg) {
  ****************************************************************************/
 
 static int josh_lsm6dso32_xl_attach(xcpt_t handler, FAR void *arg) {
+  int err = stm32_configgpio(GPIO_XL_INT);
+  if (err < 0) {
+    return err;
+  }
   return stm32_gpiosetevent(GPIO_XL_INT, true, false, false, handler, arg);
 }
 #endif
