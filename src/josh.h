@@ -115,9 +115,12 @@
 /* IMU interrupt pins */
 
 #define GPIO_XL_INT                                                            \
-  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTE | GPIO_PIN0)
+  (GPIO_INPUT | GPIO_PUSHPULL | GPIO_FLOAT | GPIO_EXTI | GPIO_SPEED_100MHz |   \
+   GPIO_PORTE | GPIO_PIN0)
+
 #define GPIO_GY_INT                                                            \
-  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTE | GPIO_PIN1)
+  (GPIO_INPUT | GPIO_PUSHPULL | GPIO_FLOAT | GPIO_EXTI | GPIO_SPEED_100MHz |   \
+   GPIO_PORTE | GPIO_PIN1)
 
 /* Buzzer
  * Josh has an arming buzzer to indicate when it is armed and running.
