@@ -50,6 +50,11 @@
 #include <nuttx/sensors/lsm6dso32.h>
 #endif
 
+#if defined(CONFIG_SENSORS_LIS2MDL)
+#include "stm32_i2c.h"
+#include <nuttx/sensors/lis2mdl.h>
+#endif
+
 #if defined(CONFIG_I2C_EE_24XX)
 #include "stm32_i2c.h"
 #include <nuttx/eeprom/i2c_xx24xx.h>
@@ -94,6 +99,10 @@ static void partition_handler(struct partition_s *part, void *arg) {
  ****************************************************************************/
 
 static int josh_lsm6dso32_gy_attach(xcpt_t handler, FAR void *arg) {
+  int err = stm32_configgpio(GPIO_GY_INT);
+  if (err < 0) {
+    return err;
+  }
   return stm32_gpiosetevent(GPIO_GY_INT, true, false, false, handler, arg);
 }
 
@@ -106,6 +115,10 @@ static int josh_lsm6dso32_gy_attach(xcpt_t handler, FAR void *arg) {
  ****************************************************************************/
 
 static int josh_lsm6dso32_xl_attach(xcpt_t handler, FAR void *arg) {
+  int err = stm32_configgpio(GPIO_XL_INT);
+  if (err < 0) {
+    return err;
+  }
   return stm32_gpiosetevent(GPIO_XL_INT, true, false, false, handler, arg);
 }
 #endif
@@ -237,6 +250,15 @@ int stm32_bringup(void) {
     syslog(LOG_ERR, "Failed to register LSM6DSO32: %d\n", ret);
   }
 #endif /* defined(CONFIG_SENSORS_LSM6DSO32) */
+
+#if defined(CONFIG_SENSORS_LIS2MDL)
+  /* Register LIS2MDL at 0x1e on I2C1 */
+
+  ret = lis2mdl_register(stm32_i2cbus_initialize(1), 0, 0x1e, NULL);
+  if (ret < 0) {
+    syslog(LOG_ERR, "Failed to register LIS2MDL: %d\n", ret);
+  }
+#endif
 
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
