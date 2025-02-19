@@ -65,14 +65,29 @@
 #endif
 
 /****************************************************************************
- * Private Functions
+ * Pre-processor Directives
  ****************************************************************************/
 
+#if defined(CONFIG_STM32H7_SDMMC) && !defined(CONFIG_GPT_PARTITION)
+#error "In order to register all partitions, enbalbe GPT_PARTITION"
+#endif
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+#if defined(CONFIG_STM32H7_SDMMC)
 typedef struct {
   int partition_num;
   uint8_t err;
 } partition_state_t;
+#endif
 
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+#if defined(CONFIG_STM32H7_SDMMC)
 static void partition_handler(struct partition_s *part, void *arg) {
   partition_state_t *partition_handler_state = (partition_state_t *)arg;
 
@@ -87,6 +102,7 @@ static void partition_handler(struct partition_s *part, void *arg) {
     partition_handler_state->err = 0;
   }
 }
+#endif
 
 #if defined(CONFIG_SENSORS_LSM6DSO32) && defined(CONFIG_SCHED_HPWORK)
 

@@ -115,12 +115,12 @@
 /* IMU interrupt pins */
 
 #define GPIO_XL_INT                                                            \
-  (GPIO_INPUT | GPIO_PUSHPULL | GPIO_FLOAT | GPIO_EXTI | GPIO_SPEED_100MHz |   \
-   GPIO_PORTE | GPIO_PIN0)
+  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_SPEED_100MHz | GPIO_PORTE |      \
+   GPIO_PIN0)
 
 #define GPIO_GY_INT                                                            \
-  (GPIO_INPUT | GPIO_PUSHPULL | GPIO_FLOAT | GPIO_EXTI | GPIO_SPEED_100MHz |   \
-   GPIO_PORTE | GPIO_PIN1)
+  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_SPEED_100MHz | GPIO_PORTE |      \
+   GPIO_PIN1)
 
 /* Buzzer
  * Josh has an arming buzzer to indicate when it is armed and running.
@@ -144,13 +144,9 @@
 
 #endif
 
-/* SD card detected pin (currently unused) */
-
 #if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_MMCSD_SDIO)
 #  undef HAVE_SDIO
 #endif
-
-#define GPIO_SDIO_NCD      (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTC|GPIO_PIN13)
 
 #define SDIO_SLOTNO        0
 #define SDIO_MINOR         0
