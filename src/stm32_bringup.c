@@ -60,6 +60,10 @@
 #include <nuttx/eeprom/i2c_xx24xx.h>
 #endif
 
+#ifdef CONFIG_LPWAN_RN2XX3
+#include <nuttx/wireless/lpwan/rn2xx3.h>
+#endif
+
 #ifdef CONFIG_PWM
 #include "stm32_pwm.h"
 #endif
@@ -273,6 +277,24 @@ int stm32_bringup(void) {
   ret = lis2mdl_register(stm32_i2cbus_initialize(1), 0, 0x1e, NULL);
   if (ret < 0) {
     syslog(LOG_ERR, "Failed to register LIS2MDL: %d\n", ret);
+  }
+#endif
+
+#ifdef CONFIG_LPWAN_RN2XX3
+
+#if CONFIG_USART2_BAUD != 57600
+#error "CONFIG_USART2_BAUD must be set to 57600 for RN2XX3"
+#endif
+
+#ifndef CONFIG_STANDARD_SERIAL
+#error "CONFIG_STANDARD_SERIAL must be enabled for RN2XX3"
+#endif /* CONFIG_STANDARD_SERIAL */
+
+  /* Register the RN2XX3 device driver */
+
+  ret = rn2xx3_register("/dev/rn2483", "/dev/ttyS1");
+  if (ret < 0) {
+    syslog(LOG_ERR, "Failed to register RN2XX3 device driver: %d\n", ret);
   }
 #endif
 
