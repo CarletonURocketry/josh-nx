@@ -60,19 +60,38 @@
 #include <nuttx/eeprom/i2c_xx24xx.h>
 #endif
 
+#ifdef CONFIG_LPWAN_RN2XX3
+#include <nuttx/wireless/lpwan/rn2xx3.h>
+#endif
+
 #ifdef CONFIG_PWM
 #include "stm32_pwm.h"
+#endif
+
+/****************************************************************************
+ * Pre-processor Directives
+ ****************************************************************************/
+
+#if defined(CONFIG_STM32H7_SDMMC) && !defined(CONFIG_GPT_PARTITION)
+#error "In order to register all partitions, enbalbe GPT_PARTITION"
+#endif
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+#if defined(CONFIG_STM32H7_SDMMC)
+typedef struct {
+  int partition_num;
+  uint8_t err;
+} partition_state_t;
 #endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-typedef struct {
-  int partition_num;
-  uint8_t err;
-} partition_state_t;
-
+#if defined(CONFIG_STM32H7_SDMMC)
 static void partition_handler(struct partition_s *part, void *arg) {
   partition_state_t *partition_handler_state = (partition_state_t *)arg;
 
@@ -87,6 +106,7 @@ static void partition_handler(struct partition_s *part, void *arg) {
     partition_handler_state->err = 0;
   }
 }
+#endif
 
 #if defined(CONFIG_SENSORS_LSM6DSO32) && defined(CONFIG_SCHED_HPWORK)
 
@@ -257,6 +277,24 @@ int stm32_bringup(void) {
   ret = lis2mdl_register(stm32_i2cbus_initialize(1), 0, 0x1e, NULL);
   if (ret < 0) {
     syslog(LOG_ERR, "Failed to register LIS2MDL: %d\n", ret);
+  }
+#endif
+
+#ifdef CONFIG_LPWAN_RN2XX3
+
+#if CONFIG_USART2_BAUD != 57600
+#error "CONFIG_USART2_BAUD must be set to 57600 for RN2XX3"
+#endif
+
+#ifndef CONFIG_STANDARD_SERIAL
+#error "CONFIG_STANDARD_SERIAL must be enabled for RN2XX3"
+#endif /* CONFIG_STANDARD_SERIAL */
+
+  /* Register the RN2XX3 device driver */
+
+  ret = rn2xx3_register("/dev/rn2483", "/dev/ttyS1");
+  if (ret < 0) {
+    syslog(LOG_ERR, "Failed to register RN2XX3 device driver: %d\n", ret);
   }
 #endif
 
