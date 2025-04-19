@@ -227,7 +227,7 @@ int stm32_bringup(void) {
   /* EEPROM on I2C */
 
 #if defined(CONFIG_I2C_EE_24XX)
-  ret = ee24xx_initialize(stm32_i2cbus_initialize(2), 0x50, "eeprom",
+  ret = ee24xx_initialize(stm32_i2cbus_initialize(2), 0x50, "/dev/eeprom",
                           EEPROM_M24C32, false);
   if (ret < 0) {
     syslog(LOG_ERR, "Could not register EEPROM driver: %d.\n", ret);
