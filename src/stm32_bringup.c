@@ -55,6 +55,10 @@
 #include <nuttx/sensors/lis2mdl.h>
 #endif
 
+#if defined(CONFIG_SENSORS_L86_M33)
+#include <nuttx/sensors/l86m33.h>
+#endif
+
 #if defined(CONFIG_I2C_EE_24XX)
 #include "stm32_i2c.h"
 #include <nuttx/eeprom/i2c_xx24xx.h>
@@ -277,6 +281,15 @@ int stm32_bringup(void) {
   ret = lis2mdl_register(stm32_i2cbus_initialize(1), 0, 0x1e, NULL);
   if (ret < 0) {
     syslog(LOG_ERR, "Failed to register LIS2MDL: %d\n", ret);
+  }
+#endif
+
+#if defined(CONFIG_SENSORS_L86_M33)
+  /* Register L86-M33 on USART3 */
+
+  ret = l86m33_register("/dev/l86m33", "/dev/ttyS2", 0, L86M33_BAUD_115200, L86M33_UPDATE_10HZ);
+  if (ret < 0) {
+    syslog(LOG_ERR, "Failed to register L86-M33: %d\n", ret);
   }
 #endif
 
