@@ -55,8 +55,8 @@
 #include <nuttx/sensors/lis2mdl.h>
 #endif
 
-#if defined(CONFIG_SENSORS_L86_M33)
-#include <nuttx/sensors/l86m33.h>
+#if defined(CONFIG_SENSORS_L86_XXX)
+#include <nuttx/sensors/l86xxx.h>
 #endif
 
 #if defined(CONFIG_I2C_EE_24XX)
@@ -284,10 +284,10 @@ int stm32_bringup(void) {
   }
 #endif
 
-#if defined(CONFIG_SENSORS_L86_M33)
+#if defined(CONFIG_SENSORS_L86_XXX)
   /* Register L86-M33 on USART3 */
 
-  ret = l86m33_register("/dev/l86m33", "/dev/ttyS2", 0);
+  ret = l86xxx_register("/dev/l86m33", "/dev/ttyS2", 0);
   if (ret < 0) {
     syslog(LOG_ERR, "Failed to register L86-M33: %d\n", ret);
   }
