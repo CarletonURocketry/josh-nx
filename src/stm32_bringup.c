@@ -287,7 +287,7 @@ int stm32_bringup(void) {
 #if defined(CONFIG_SENSORS_L86_XXX)
   /* Register L86-M33 on USART3 */
 
-  ret = l86xxx_register("/dev/l86m33", "/dev/ttyS2", 0);
+  ret = l86xxx_register("/dev/ttyS2", 0);
   if (ret < 0) {
     syslog(LOG_ERR, "Failed to register L86-M33: %d\n", ret);
   }
