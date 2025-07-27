@@ -372,5 +372,9 @@ int stm32_bringup(void) {
   }
 #endif
 
+#ifdef CONFIG_DEV_GPIO  
+  stm32_dev_gpio_init();
+#endif
+
   return OK;
 }
