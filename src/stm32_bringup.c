@@ -147,6 +147,24 @@ static int josh_lsm6dso32_xl_attach(xcpt_t handler, FAR void *arg) {
 }
 #endif
 
+#if defined(CONFIG_SENSORS_LIS2MDL) && defined(CONFIG_SCHED_HPWORK)
+/****************************************************************************
+ * Name: josh_lis2mdl_attach
+ *
+ * Description:
+ *   Register and enable an interrupt for the LIS2MDL magnetometer
+ *
+ ****************************************************************************/
+
+static int josh_lis2mdl_attach(xcpt_t handler, FAR void *arg) {
+  int err = stm32_configgpio(GPIO_MAG_INT);
+  if (err < 0) {
+    return err;
+  }
+  return stm32_gpiosetevent(GPIO_MAG_INT, true, false, false, handler, arg);
+}
+#endif
+
 /****************************************************************************
  * Name: stm32_i2c_register
  *
@@ -278,7 +296,12 @@ int stm32_bringup(void) {
 #if defined(CONFIG_SENSORS_LIS2MDL)
   /* Register LIS2MDL at 0x1e on I2C1 */
 
+#ifndef CONFIG_SCHED_HPWORK
   ret = lis2mdl_register(stm32_i2cbus_initialize(1), 0, 0x1e, NULL);
+#else
+  ret = lis2mdl_register(stm32_i2cbus_initialize(1), 0, 0x1e,
+                         &josh_lis2mdl_attach);
+#endif /* CONFIG_SCHED_HPWORK */
   if (ret < 0) {
     syslog(LOG_ERR, "Failed to register LIS2MDL: %d\n", ret);
   }
