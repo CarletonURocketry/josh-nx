@@ -256,8 +256,8 @@ int stm32_bringup(void) {
   /* Only use interrupt driven mode if HPWORK is enabled */
 
   struct lsm6dso32_config_s lsm6dso32_config = {
-      .gy_int = LSM6DSO32_INT1,
-      .xl_int = LSM6DSO32_INT2,
+      .xl_int = LSM6DSO32_INT1,
+      .gy_int = LSM6DSO32_INT2,
   };
 
 #ifdef CONFIG_SCHED_HPWORK
