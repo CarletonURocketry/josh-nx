@@ -122,6 +122,12 @@
   (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_SPEED_100MHz | GPIO_PORTE |      \
    GPIO_PIN1)
 
+/* Magnetometer interrupt pin */
+
+#define GPIO_MAG_INT                                                           \
+  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_SPEED_100MHz | GPIO_PORTD |      \
+   GPIO_PIN15)
+
 /* Buzzer
  * Josh has an arming buzzer to indicate when it is armed and running.
  */
