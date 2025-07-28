@@ -103,6 +103,7 @@
  *   - Started: Green LED to indicate startup
  *   - Panic: Red LED to indicate panic state
  *   - Eject: Green LED to indicate when SD card can be removed safely
+ *   - SD Eject: Green LED to indicate when SD card can be removed safely, controllable from user space
  */
 
 #define GPIO_LED_STARTED (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
@@ -111,6 +112,10 @@
                           GPIO_OUTPUT_CLEAR | GPIO_PORTA | GPIO_PIN5)
 #define GPIO_LED_EJECT   (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
                           GPIO_OUTPUT_CLEAR | GPIO_PORTD | GPIO_PIN3)
+
+#define BOARD_NGPIOOUT    1 /* Amount of GPIO Output pins */
+#define GPIO_LED_SD_EJECT (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
+                          GPIO_OUTPUT_SET | GPIO_PORTD | GPIO_PIN3)
 
 /* IMU interrupt pins */
 
@@ -198,6 +203,16 @@ int stm32_sdio_initialize(void);
 
 #ifdef CONFIG_PWM
 int stm32_pwm_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_dev_gpio_init
+ *
+ * Description:
+ *   Initialize GPIO driver.
+ ****************************************************************************/
+#ifdef CONFIG_DEV_GPIO
+int stm32_dev_gpio_init(void);
 #endif
 
 #endif /* __BOARDS_ARM_STM32H7_JOSH_SRC_JOSH_H */
