@@ -72,6 +72,10 @@
 #include "stm32_pwm.h"
 #endif
 
+#if defined(CONFIG_STM32H7_ADC2)
+#include "stm32_adc.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Directives
  ****************************************************************************/
@@ -397,6 +401,13 @@ int stm32_bringup(void) {
 
 #ifdef CONFIG_DEV_GPIO  
   stm32_dev_gpio_init();
+#endif
+
+#if defined(CONFIG_STM32H7_ADC2)
+  ret = stm32_adc_setup();
+  if (ret < 0) {
+    syslog(LOG_ERR, "Couldn't set up ADC device: %d\n", ret);
+  }
 #endif
 
   return OK;

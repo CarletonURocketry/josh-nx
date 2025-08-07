@@ -18,17 +18,32 @@
 #
 # ##############################################################################
 
-set(SRCS stm32_boot.c stm32_bringup.c)
+set(SRCS stm32_boot.c stm32_bringup.c stm32_appinitialize.c)
 
 if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS stm32_autoleds.c)
-else()
-  list(APPEND SRCS stm32_userleds.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinitialize.c)
+if(CONFIG_BOARDCTL_IOCTL)
+  list(APPEND SRCS stm32_ioctl.c)
 endif()
+
+if(CONFIG_STM32H7_SDMMC)
+  list(APPEND SRCS stm32_sdmmc.c)
+endif()
+
+if(CONFIG_PWM)
+  list(APPEND SRCS stm32_pwm.c)
+endif()
+
+if(CONFIG_GPIO)
+  list(APPEND SRCS stm32_gpio.c)
+endif()
+
+if(CONFIG_ADC)
+    list(APPEND SRCS stm32_adc.c)
+endif()
+
 
 target_sources(board PRIVATE ${SRCS})
 
