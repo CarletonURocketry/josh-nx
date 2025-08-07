@@ -148,8 +148,8 @@ int stm32_dev_gpio_init(void)
 
       /* Configure the pin that will be used as output */
 
-      stm32_gpiowrite(g_gpiooutputs[i], 0);
       stm32_configgpio(g_gpiooutputs[i]);
+      stm32_gpiowrite(g_gpiooutputs[i], 0);
 
       pincount++;
     }
