@@ -155,6 +155,11 @@
 
 #endif
 
+/* ADC pins */
+
+#define GPIO_ADC12_INP5 GPIO_ADC12_INP5_0 /* PB1, channel 5 */
+#define GPIO_ADC12_INP4 GPIO_ADC12_INP4_0 /* PC4, channle 4 */
+
 #if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_MMCSD_SDIO)
 #  undef HAVE_SDIO
 #endif
@@ -211,8 +216,21 @@ int stm32_pwm_setup(void);
  * Description:
  *   Initialize GPIO driver.
  ****************************************************************************/
+
 #ifdef CONFIG_DEV_GPIO
 int stm32_dev_gpio_init(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ADC
+int stm32_adc_setup(void);
 #endif
 
 #endif /* __BOARDS_ARM_STM32H7_JOSH_SRC_JOSH_H */
