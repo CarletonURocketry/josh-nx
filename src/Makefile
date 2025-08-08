@@ -50,4 +50,8 @@ ifeq ($(CONFIG_USBDEV),y)
 CSRCS += stm32_usb.c
 endif
 
+ifeq ($(CONFIG_BOARDCTL_RESET),y)	
+CSRCS += josh_reset.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

@@ -48,6 +48,10 @@ if(CONFIG_USBDEV)
     list(APPEND SRCS stm32_usb.c)
 endif()
 
+if(CONFIG_BOARCTL_RESET)
+    list(APPEND SRCS josh_reset.c)
+endif()
+
 
 target_sources(board PRIVATE ${SRCS})
 
