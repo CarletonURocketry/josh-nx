@@ -44,6 +44,10 @@ if(CONFIG_ADC)
     list(APPEND SRCS stm32_adc.c)
 endif()
 
+if(CONFIG_USBDEV)
+    list(APPEND SRCS stm32_usb.c)
+endif()
+
 
 target_sources(board PRIVATE ${SRCS})
 

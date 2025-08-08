@@ -21,7 +21,6 @@
 include $(TOPDIR)/Make.defs
 
 CSRCS = stm32_boot.c stm32_bringup.c stm32_appinitialize.c
-# CSRCS += stm32_usb.c TODO add back after USART working
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += stm32_autoleds.c
@@ -45,6 +44,10 @@ endif
 
 ifeq ($(CONFIG_ADC),y)	
 CSRCS += stm32_adc.c
+endif
+
+ifeq ($(CONFIG_USBDEV),y)	
+CSRCS += stm32_usb.c
 endif
 
 include $(TOPDIR)/boards/Board.mk
