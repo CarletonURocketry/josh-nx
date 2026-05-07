@@ -20,6 +20,10 @@
 
 include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
+
+ifeq ($(CONFIG_ARCH_SIM),y)
+include $(TOPDIR)/boards/sim/sim/sim/scripts/Make.defs
+else
 include $(TOPDIR)/arch/arm/src/armv7-m/Toolchain.defs
 
 LDSCRIPT = flash.ld
@@ -46,3 +50,4 @@ CXXELFFLAGS = $(CXXFLAGS) -mlong-calls # --target1-abs
 
 LDELFFLAGS = -r -e main
 LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/binfmt/libelf/gnu-elf.ld)
+endif
