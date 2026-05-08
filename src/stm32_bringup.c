@@ -350,7 +350,7 @@ int stm32_bringup(void) {
 #ifdef CONFIG_STM32H7_SDMMC
   ret = stm32_sdio_initialize();
   if (ret < 0) {
-    syslog(LOG_ERR, "ERROR: Failed to register SD card device: %d\n.", ret);
+    ferr("ERROR: Failed to register SD card device: %d\n.", ret);
   }
 
   /* Look for both partitions */
@@ -375,8 +375,7 @@ int stm32_bringup(void) {
 
   if (ret) {
     ferr("ERROR: Could not mount fat partition %d: \n", ret);
-    return ret;
-  }
+  };
 
   /* Mount second partition as littlefs file system (power safe)
    * Auto-format because a user cannot feasibly create littlefs system ahead of
@@ -387,7 +386,6 @@ int stm32_bringup(void) {
 
   if (ret) {
     ferr("ERROR: Could not mount littlefs partition %d: \n", ret);
-    return ret;
   }
 
 #endif
