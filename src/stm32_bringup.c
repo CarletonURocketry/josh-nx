@@ -89,7 +89,8 @@
  ****************************************************************************/
 
 #if defined(CONFIG_STM32H7_SDMMC)
-typedef struct {
+typedef struct
+{
   int partition_num;
   uint8_t err;
 } partition_state_t;
@@ -100,13 +101,15 @@ typedef struct {
  ****************************************************************************/
 
 #if defined(CONFIG_STM32H7_SDMMC)
-static void partition_handler(struct partition_s *part, void *arg) {
+static void partition_handler(struct partition_s *part, void *arg)
+{
   partition_state_t *partition_handler_state = (partition_state_t *)arg;
 
   char devname[] = "/dev/mmcsd0p0";
 
   if (partition_handler_state->partition_num < 10 &&
-      part->index == partition_handler_state->partition_num) {
+      part->index == partition_handler_state->partition_num)
+  {
     finfo("Num of sectors: %d \n", part->nblocks);
     devname[sizeof(devname) - 2] = partition_handler_state->partition_num + 48;
     register_blockpartition(devname, 0, "/dev/mmcsd0", part->firstblock,
@@ -126,9 +129,11 @@ static void partition_handler(struct partition_s *part, void *arg) {
  *
  ****************************************************************************/
 
-static int josh_lsm6dso32_gy_attach(xcpt_t handler, FAR void *arg) {
+static int josh_lsm6dso32_gy_attach(xcpt_t handler, FAR void *arg)
+{
   int err = stm32_configgpio(GPIO_GY_INT);
-  if (err < 0) {
+  if (err < 0)
+  {
     return err;
   }
   return stm32_gpiosetevent(GPIO_GY_INT, true, false, false, handler, arg);
@@ -142,9 +147,11 @@ static int josh_lsm6dso32_gy_attach(xcpt_t handler, FAR void *arg) {
  *
  ****************************************************************************/
 
-static int josh_lsm6dso32_xl_attach(xcpt_t handler, FAR void *arg) {
+static int josh_lsm6dso32_xl_attach(xcpt_t handler, FAR void *arg)
+{
   int err = stm32_configgpio(GPIO_XL_INT);
-  if (err < 0) {
+  if (err < 0)
+  {
     return err;
   }
   return stm32_gpiosetevent(GPIO_XL_INT, true, false, false, handler, arg);
@@ -160,9 +167,11 @@ static int josh_lsm6dso32_xl_attach(xcpt_t handler, FAR void *arg) {
  *
  ****************************************************************************/
 
-static int josh_lis2mdl_attach(xcpt_t handler, FAR void *arg) {
+static int josh_lis2mdl_attach(xcpt_t handler, FAR void *arg)
+{
   int err = stm32_configgpio(GPIO_MAG_INT);
-  if (err < 0) {
+  if (err < 0)
+  {
     return err;
   }
   return stm32_gpiosetevent(GPIO_MAG_INT, true, false, false, handler, arg);
@@ -178,17 +187,22 @@ static int josh_lis2mdl_attach(xcpt_t handler, FAR void *arg) {
  ****************************************************************************/
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
-static void stm32_i2c_register(int bus) {
+static void stm32_i2c_register(int bus)
+{
   struct i2c_master_s *i2c;
   int ret;
 
   i2c = stm32_i2cbus_initialize(bus);
-  if (i2c == NULL) {
+  if (i2c == NULL)
+  {
     syslog(LOG_ERR, "ERROR: Failed to get I2C%d interface\n", bus);
-  } else {
+  }
+  else
+  {
     i2cinfo("I2C bus %d initialized\n", bus);
     ret = i2c_register(i2c, bus);
-    if (ret < 0) {
+    if (ret < 0)
+    {
       syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
       stm32_i2cbus_uninitialize(i2c);
     }
@@ -205,7 +219,8 @@ static void stm32_i2c_register(int bus) {
  ****************************************************************************/
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
-static void stm32_i2ctool(void) {
+static void stm32_i2ctool(void)
+{
   i2cinfo("Registering I2CTOOL busses.");
 #ifdef CONFIG_STM32H7_I2C1
   stm32_i2c_register(1);
@@ -241,7 +256,8 @@ static void stm32_i2ctool(void) {
  *
  ****************************************************************************/
 
-int stm32_bringup(void) {
+int stm32_bringup(void)
+{
   int ret = OK;
 
   /* I2C device drivers */
@@ -255,7 +271,8 @@ int stm32_bringup(void) {
 #if defined(CONFIG_I2C_EE_24XX)
   ret = ee24xx_initialize(stm32_i2cbus_initialize(2), 0x50, "/dev/eeprom",
                           EEPROM_M24C32, false);
-  if (ret < 0) {
+  if (ret < 0)
+  {
     syslog(LOG_ERR, "Could not register EEPROM driver: %d.\n", ret);
   }
 #endif
@@ -267,7 +284,8 @@ int stm32_bringup(void) {
 
   ret = ms56xx_register(stm32_i2cbus_initialize(1), 0, MS56XX_ADDR1,
                         MS56XX_MODEL_MS5607);
-  if (ret < 0) {
+  if (ret < 0)
+  {
     syslog(LOG_ERR, "Failed to register MS5607: %d\n", ret);
   }
 #endif /* defined(CONFIG_SENSORS_MS56XX) */
@@ -289,24 +307,29 @@ int stm32_bringup(void) {
   lsm6dso32_config.gy_attach = NULL;
   lsm6dso32_config.xl_attach = NULL;
 #endif /* CONFIG_SCHED_HPWORK */
-
-  ret = lsm6dso32_register(stm32_i2cbus_initialize(1), 0x6a, 0,
+  struct lsm6dso32_bus_config_s lsm6dso32_bus_config;
+  lsm6dso32_bus_config.i2c = stm32_i2cbus_initialize(1);
+  ret = lsm6dso32_register(&lsm6dso32_bus_config, 0,
                            &lsm6dso32_config);
-  if (ret < 0) {
+  if (ret < 0)
+  {
     syslog(LOG_ERR, "Failed to register LSM6DSO32: %d\n", ret);
   }
 #endif /* defined(CONFIG_SENSORS_LSM6DSO32) */
 
 #if defined(CONFIG_SENSORS_LIS2MDL)
   /* Register LIS2MDL at 0x1e on I2C1 */
-
+  struct lis2mdl_config_s lis2mdl_config;
+  lis2mdl_config.addr = 0x1e;
+  lis2mdl_config.i2c = stm32_i2cbus_initialize(1);
 #ifndef CONFIG_SCHED_HPWORK
-  ret = lis2mdl_register(stm32_i2cbus_initialize(1), 0, 0x1e, NULL);
+  ret = lis2mdl_register(&lis2mdl_config, 0, NULL);
 #else
-  ret = lis2mdl_register(stm32_i2cbus_initialize(1), 0, 0x1e,
+  ret = lis2mdl_register(&lis2mdl_config, 0,
                          &josh_lis2mdl_attach);
 #endif /* CONFIG_SCHED_HPWORK */
-  if (ret < 0) {
+  if (ret < 0)
+  {
     syslog(LOG_ERR, "Failed to register LIS2MDL: %d\n", ret);
   }
 #endif
@@ -315,7 +338,8 @@ int stm32_bringup(void) {
   /* Register L86-M33 on USART3 */
 
   ret = l86xxx_register("/dev/ttyS2", 0);
-  if (ret < 0) {
+  if (ret < 0)
+  {
     syslog(LOG_ERR, "Failed to register L86-M33: %d\n", ret);
   }
 #endif
@@ -333,7 +357,8 @@ int stm32_bringup(void) {
   /* Register the RN2XX3 device driver */
 
   ret = rn2xx3_register("/dev/rn2483", "/dev/ttyS1");
-  if (ret < 0) {
+  if (ret < 0)
+  {
     syslog(LOG_ERR, "Failed to register RN2XX3 device driver: %d\n", ret);
   }
 #endif
@@ -342,14 +367,16 @@ int stm32_bringup(void) {
   /* Mount the procfs file system */
 
   ret = nx_mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
-  if (ret < 0) {
+  if (ret < 0)
+  {
     syslog(LOG_ERR, "ERROR: Failed to mount the PROC filesystem: %d\n", ret);
   }
 #endif /* CONFIG_FS_PROCFS */
 
 #ifdef CONFIG_STM32H7_SDMMC
   ret = stm32_sdio_initialize();
-  if (ret < 0) {
+  if (ret < 0)
+  {
     ferr("ERROR: Failed to register SD card device: %d\n.", ret);
   }
 
@@ -360,11 +387,15 @@ int stm32_bringup(void) {
       {.partition_num = 1, .err = ENOENT},
   };
 
-  for (int i = 0; i < 2; i++) {
+  for (int i = 0; i < 2; i++)
+  {
     parse_block_partition("/dev/mmcsd0", partition_handler, &partitions[i]);
-    if (partitions[i].err == ENOENT) {
+    if (partitions[i].err == ENOENT)
+    {
       fwarn("Partition %d did not register \n", partitions[i].partition_num);
-    } else {
+    }
+    else
+    {
       finfo("Partition %d registered! \n", partitions[i].partition_num);
     }
   }
@@ -373,7 +404,8 @@ int stm32_bringup(void) {
 
   ret = nx_mount("/dev/mmcsd0p0", "/mnt/usrfs", "vfat", 0, NULL);
 
-  if (ret) {
+  if (ret)
+  {
     ferr("ERROR: Could not mount fat partition %d: \n", ret);
   };
 
@@ -384,7 +416,8 @@ int stm32_bringup(void) {
 
   ret = nx_mount("/dev/mmcsd0p1", "/mnt/pwrfs", "littlefs", 0, "autoformat");
 
-  if (ret) {
+  if (ret)
+  {
     ferr("ERROR: Could not mount littlefs partition %d: \n", ret);
   }
 
@@ -392,18 +425,20 @@ int stm32_bringup(void) {
 
 #ifdef CONFIG_PWM
   ret = stm32_pwm_setup();
-  if (ret < 0) {
+  if (ret < 0)
+  {
     syslog(LOG_ERR, "Could not register PWM driver.");
   }
 #endif
 
-#ifdef CONFIG_DEV_GPIO  
+#ifdef CONFIG_DEV_GPIO
   stm32_dev_gpio_init();
 #endif
 
 #if defined(CONFIG_STM32H7_ADC2)
   ret = stm32_adc_setup();
-  if (ret < 0) {
+  if (ret < 0)
+  {
     syslog(LOG_ERR, "Couldn't set up ADC device: %d\n", ret);
   }
 #endif
