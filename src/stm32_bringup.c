@@ -61,7 +61,7 @@
 
 #if defined(CONFIG_I2C_EE_24XX)
 #include "stm32_i2c.h"
-#include <nuttx/eeprom/i2c_xx24xx.h>
+#include <nuttx/eeprom/eeprom.h>
 #endif
 
 #ifdef CONFIG_LPWAN_RN2XX3
@@ -289,8 +289,12 @@ int stm32_bringup(void) {
   lsm6dso32_config.gy_attach = NULL;
   lsm6dso32_config.xl_attach = NULL;
 #endif /* CONFIG_SCHED_HPWORK */
+  struct lsm6dso32_bus_config_s lsm6dso32_bus = {
+      .i2c = stm32_i2cbus_initialize(1),
+      .addr = 0x6a,
+  };
 
-  ret = lsm6dso32_register(stm32_i2cbus_initialize(1), 0x6a, 0,
+  ret = lsm6dso32_register(&lsm6dso32_bus, 0,
                            &lsm6dso32_config);
   if (ret < 0) {
     syslog(LOG_ERR, "Failed to register LSM6DSO32: %d\n", ret);
@@ -299,11 +303,15 @@ int stm32_bringup(void) {
 
 #if defined(CONFIG_SENSORS_LIS2MDL)
   /* Register LIS2MDL at 0x1e on I2C1 */
+  struct lis2mdl_config_s lis2mdl_config = {
+      .i2c = stm32_i2cbus_initialize(1),
+      .addr = 0x1e,
+  };
 
 #ifndef CONFIG_SCHED_HPWORK
-  ret = lis2mdl_register(stm32_i2cbus_initialize(1), 0, 0x1e, NULL);
+  ret = lis2mdl_register(&lis2mdl_config, 0, NULL);
 #else
-  ret = lis2mdl_register(stm32_i2cbus_initialize(1), 0, 0x1e,
+  ret = lis2mdl_register(&lis2mdl_config, 0,
                          &josh_lis2mdl_attach);
 #endif /* CONFIG_SCHED_HPWORK */
   if (ret < 0) {
